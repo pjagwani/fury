@@ -29,7 +29,7 @@ object Manifest {
         mainClass.to[List].map("Main-Class" -> _),
         List("Class-Path"                   -> classpathString),
         List("Created-By"                   -> str"Fury ${Version.current}")
-    ).flatten.map {
+    ).flatten.flatMap {
       case (k, v) =>
         val line = s"$k: $v"
         line.tail.grouped(71).mkString(line.head.toString, "\n ", "")

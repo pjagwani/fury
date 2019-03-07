@@ -38,11 +38,6 @@ case class Tables(config: Config) {
       implicitly[MsgShow[S]].show(e).string(Theme.NoColor)
     } else table.tabulate(cols, rows)
 
-  def contextString(layer: UserMsg, showSchema: Boolean, elements: UserMsg*): UserMsg =
-    (if (showSchema) elements else elements.tail).foldLeft(layer) { (l, r) =>
-      msg"$l/$r"
-    }
-
   implicit private val parameter: AnsiShow[SortedSet[Parameter]] = _.map(_.name).map {
     case s @ r"X.*" => Ansi.brightYellow("-" + s)
     case s @ r"D.*" => Ansi.yellow("-" + s)

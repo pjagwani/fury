@@ -356,6 +356,33 @@ object BuildCli {
             .foreach(io.println(_))
     } yield io.await()
   }
+
+  def pkg(ctx: MenuContext): Try[ExitStatus] = {
+    import ctx._
+    for {
+      cli          <- cli.hint(SchemaArg, layer.schemas)
+      schemaArg    <- ~cli.peek(SchemaArg).getOrElse(layer.main)
+      schema       <- layer.schemas.findBy(schemaArg)
+      cli          <- cli.hint(ProjectArg, schema.projects)
+      optProjectId <- ~cli.peek(ProjectArg).orElse(schema.main)
+      optProject   <- ~optProjectId.flatMap(schema.projects.findBy(_).toOption)
+      cli          <- cli.hint(ModuleArg, optProject.to[List].flatMap(_.modules))
+      cli          <- cli.hint(DirArg)
+      invoc        <- cli.read()
+      io           <- invoc.io()
+      dir          <- invoc(DirArg)
+      project      <- optProject.ascribe(UnspecifiedProject())
+      optModuleId  <- ~invoc(ModuleArg).toOption.orElse(project.main)
+      optModule    <- ~optModuleId.flatMap(project.modules.findBy(_).toOption)
+      module       <- optModule.ascribe(UnspecifiedModule())
+      foo = module.allBinaries
+      hierarchy    <- schema.hierarchy(io, layout.base, layout)
+      universe     <- hierarchy.universe
+      compilation  <- universe.compilation(io, module.ref(project), layout)
+      _            <- compilation.savePom(io, module.ref(project), module.allBinaries, dir in layout.pwd, layout)
+    } yield io.await()
+  }
+
 }
 
 object LayerCli {

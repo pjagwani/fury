@@ -238,6 +238,16 @@ case class Compilation(
           }
     } yield ()
 
+  def savePom(io: Io, ref: ModuleRef, knownDependencies: Set[Binary], dest: Path, layout: Layout): Try[Unit] =
+    for {
+      dest <- dest.directory
+      _            <- ~io.println(msg"Writing POM file ${layout.pomFile(hash(ref))}")
+      pomFile <- Pom.file(layout.pomFile(hash(ref)), ref, knownDependencies)
+      path         <- ~(dest / str"${ref.projectId.key}-${ref.moduleId.key}-pom.xml")
+      _            <- ~io.println(msg"Saving POM file to $path")
+      _            <- layout.shell.copyTo(pomFile, path)
+    } yield ()
+
   def allParams(io: Io, ref: ModuleRef, layout: Layout): List[String] =
     (artifacts(ref).params ++ allDependencies.filter(_.kind == Plugin).map { plugin =>
       Parameter(str"Xplugin:${layout.classesDir(hash(plugin.ref))}")

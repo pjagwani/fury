@@ -8,6 +8,10 @@ BCOUNT=0
 BPASSED=0
 BFAILED=0
 
+silent() {
+  $@ 2>&1 > /dev/null
+}
+
 runtest() {
   DIR="$1"
   TEST="$2"

@@ -86,7 +86,7 @@ object RepoCli {
       repoId    <- invoc(RepoArg)
       repo      <- schema.repos.findBy(repoId)
       dir       <- invoc(DirArg)
-      bareRepo  <- repo.repo.fetch(io, layout)
+      bareRepo  <- repo.repo.fetch(io)(layout)
       absPath <- (for {
                   absPath <- dir.absolutePath()
                   _       <- Try(absPath.mkdir())
@@ -173,7 +173,7 @@ object RepoCli {
                   })
       urlArg <- cli.peek(UrlArg).ascribe(exoskeleton.MissingArg("url"))
       repo   <- repoOpt.ascribe(exoskeleton.InvalidArgValue("url", urlArg))
-      _      <- repo.fetch(io, layout)
+      _      <- repo.fetch(io)(layout)
       commit <- repo
                  .getCommitFromTag(layout, version)
                  .toOption

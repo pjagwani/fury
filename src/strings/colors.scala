@@ -89,8 +89,8 @@ object Theme {
           license = Rgb(160, 160, 170),
           binary = Rgb(100, 200, 200),
           gray = Rgb(80, 80, 80),
-          success = Rgb(40, 150, 40),
-          ongoing = Rgb(150, 120, 0),
+          success = Rgb(75, 125, 50),
+          ongoing = Rgb(125, 75, 50),
           failure = Rgb(200, 0, 0),
           lineNo = Rgb(255, 255, 0))
 

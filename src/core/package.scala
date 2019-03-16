@@ -45,6 +45,15 @@ object `package` {
   implicit val msgShowBoolean: MsgShow[Boolean] = if (_) msg">" else msg""
   implicit val msgShowPath: MsgShow[Path]       = path => UserMsg(_.path(path.value))
 
+  implicit val msgShowPaths: MsgShow[List[Path]] = {
+    case Nil       => msg"${'{'}${'}'}"
+    case List(one) => UserMsg(_.path(one.value))
+    case many =>
+      msg"${'{'}${many.map { p =>
+        UserMsg(_.path(p.value))
+      }.reduce(_ + msg"${','} " + _)}${'}'}"
+  }
+
   implicit val fileSystemSafeBase64Url: ByteEncoder[Base64Url] =
     ByteEncoder.base64.encode(_).replace('/', '_').takeWhile(_ != '=')
 

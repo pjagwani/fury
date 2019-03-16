@@ -163,7 +163,7 @@ case class Tables(config: Config) {
       Heading("COMPILER", _.compiler)
   )
 
-  def repositories(layout: Layout): Tabulation[SourceRepo] = Tabulation(
+  def repositories(implicit layout: Layout): Tabulation[SourceRepo] = Tabulation(
       Heading("REPO", _.id),
       Heading("REMOTE", _.repo),
       Heading("TRACK", _.track),

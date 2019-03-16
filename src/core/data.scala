@@ -857,7 +857,7 @@ object Layer {
   private def upgrade(io: Io, layout: Layout, ogdl: Ogdl): Ogdl =
     Try(ogdl.version().toInt).getOrElse(1) match {
       case 1 =>
-        io.println("Migrating layer.fury from file format v1")
+        io.println(msg"Migrating ${Path("layer.fury")} from file format version 1")
         upgrade(
             io,
             layout,
@@ -865,7 +865,7 @@ object Layer {
                 schemas = ogdl.schemas.map { schema =>
                   schema.set(
                       repos = schema.repos.map { repo =>
-                        io.println(s"Checking commit hash for ${repo.repo()}")
+                        io.println(msg"Checking commit hash for ${repo.repo()}")
                         val commit =
                           layout.shell.git.lsRemoteRefSpec(repo.repo(), repo.refSpec()).toOption.get
                         repo.set(commit = Ogdl(Commit(commit)), track = repo.refSpec)
@@ -876,7 +876,7 @@ object Layer {
             )
         )
       case 2 =>
-        io.println("Migrating layer.fury from file format v2")
+        io.println(msg"Migrating ${Path("layer.fury")} from file format version 2")
         upgrade(
             io,
             layout,
@@ -996,7 +996,9 @@ object ModuleId {
 case class ModuleId(key: String) extends Key(msg"module")
 
 object Repo {
-  implicit val msgShow: MsgShow[Repo]       = r => UserMsg(_.url(r.simplified))
+  implicit def msgShow(implicit layout: Layout): MsgShow[Repo] =
+    r =>
+      if (r.isLocal) msg"${Path(r.url).relativizeTo(layout.pwd)}" else UserMsg(_.url(r.simplified))
   implicit val stringShow: StringShow[Repo] = _.simplified
 
   case class ExistingLocalFileAsAbspath(absPath: String)
@@ -1035,7 +1037,7 @@ case class Checkout(
 
   def get(io: Io, layout: Layout): Try[Path] =
     for {
-      repoDir    <- repo.fetch(io, layout)
+      repoDir    <- repo.fetch(io)(layout)
       workingDir <- checkout(io, layout)
     } yield workingDir
 
@@ -1044,13 +1046,17 @@ case class Checkout(
       if (!(path(layout) / ".done").exists) {
 
         if (path(layout).exists()) {
-          io.println(s"Found incomplete checkout of ${if (sources.isEmpty) "all sources"
-          else sources.map(_.value).mkString("[", ", ", "]")}.")
+          io.println {
+            if (sources.isEmpty) msg"Incomplete checkout of sources from ${repoId}"
+            else msg"Incomplete checkout of $sources from $repoId"
+          }
           path(layout).delete()
         }
 
-        io.println(msg"Checking out ${if (sources.isEmpty) "all sources from repository ${repoId}"
-        else sources.map(_.value).mkString("[", ", ", "]")}.")
+        io.println {
+          if (sources.isEmpty) msg"Checking out all sources from ${repoId}"
+          else msg"Checking out $sources from $repoId"
+        }
         path(layout).mkdir()
         layout.shell.git
           .sparseCheckout(
@@ -1076,7 +1082,7 @@ case class SourceRepo(id: RepoId, repo: Repo, track: RefSpec, commit: Commit, lo
 
   def listFiles(io: Io, layout: Layout): Try[List[Path]] =
     for {
-      dir <- local.map(Success(_)).getOrElse(repo.fetch(io, layout))
+      dir <- local.map(Success(_)).getOrElse(repo.fetch(io)(layout))
       commit <- ~layout.shell.git
                  .getTag(dir, track.id)
                  .toOption
@@ -1091,7 +1097,7 @@ case class SourceRepo(id: RepoId, repo: Repo, track: RefSpec, commit: Commit, lo
 
   def importCandidates(io: Io, schema: Schema, layout: Layout): Try[List[String]] =
     for {
-      repoDir     <- repo.fetch(io, layout)
+      repoDir     <- repo.fetch(io)(layout)
       layerString <- layout.shell.git.showFile(repoDir, "layer.fury")
       layer       <- Layer.read(io, layerString, layout)
       schemas     <- ~layer.schemas.to[List]
@@ -1102,7 +1108,7 @@ case class SourceRepo(id: RepoId, repo: Repo, track: RefSpec, commit: Commit, lo
 
   def current(io: Io, layout: Layout): Try[RefSpec] =
     for {
-      dir    <- local.map(Success(_)).getOrElse(repo.fetch(io, layout))
+      dir    <- local.map(Success(_)).getOrElse(repo.fetch(io)(layout))
       commit <- layout.shell.git.getCommit(dir)
     } yield RefSpec(commit)
 
@@ -1128,20 +1134,17 @@ case class Repo(url: String) {
 
   def isLocal = url.startsWith("/")
 
-  def localizedUrl(layout: Layout): String =
-    if (isLocal) Path(url).relativizeTo(layout.pwd).value else url
-
   def hash: Digest               = url.digest[Md5]
   def path(layout: Layout): Path = layout.reposDir / hash.encoded
 
-  def update(layout: Layout): Try[UserMsg] =
+  def update(implicit layout: Layout): Try[UserMsg] =
     for {
       oldCommit <- layout.shell.git.getCommit(path(layout))
       _         <- layout.shell.git.fetch(path(layout), None)
       newCommit <- layout.shell.git.getCommit(path(layout))
       msg <- ~(if (oldCommit != newCommit)
-                 msg"Repository ${localizedUrl(layout)} updated to new commit $newCommit"
-               else msg"Repository ${localizedUrl(layout)} is unchanged")
+                 msg"Repository ${this} updated to new commit $newCommit"
+               else msg"Repository ${this} is unchanged")
     } yield msg
 
   def getCommitFromTag(layout: Layout, tag: RefSpec): Try[String] =
@@ -1149,14 +1152,14 @@ case class Repo(url: String) {
       commit <- layout.shell.git.getCommitFromTag(path(layout), tag.id)
     } yield commit
 
-  def fetch(io: Io, layout: Layout): Try[Path] =
+  def fetch(io: Io)(implicit layout: Layout): Try[Path] =
     if (!(path(layout) / ".done").exists) {
       if (path(layout).exists()) {
-        io.println(s"Found incomplete clone of ${localizedUrl(layout)}.")
+        io.println(msg"Found incomplete clone of ${this}")
         path(layout).delete()
       }
 
-      io.println(s"Cloning Git repository ${localizedUrl(layout)}.")
+      io.println(msg"Cloning Git repository ${this}")
       path(layout).mkdir()
       layout.shell.git.cloneBare(url, path(layout)).map { _ =>
         path(layout)

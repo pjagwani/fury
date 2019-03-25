@@ -23,7 +23,6 @@ import exoskeleton._
 object Args {
   implicit private val schemaId: TExtractor[SchemaId] =
     _.headOption.flatMap(SchemaId.parse(_).toOption)
-  implicit private val schemaRef: TExtractor[SchemaRef] = _.headOption.flatMap(SchemaRef.unapply(_))
   implicit private val aliasCmd: TExtractor[AliasCmd]   = _.headOption.map(AliasCmd(_))
   implicit private val parameter: TExtractor[Parameter] = _.headOption.map(Parameter(_))
   implicit private val licenseId: TExtractor[LicenseId] = _.headOption.map(LicenseId(_))
@@ -35,6 +34,8 @@ object Args {
     _.headOption.flatMap(ProjectId.parse(_).toOption)
   implicit private val layerId: TExtractor[LayerId] =
     _.headOption.flatMap(LayerId.parse(_).toOption)
+  implicit private val imported: TExtractor[Import] =
+    _.headOption.flatMap(Import.unapply(_))
   implicit private val path: TExtractor[Path]       = _.headOption.flatMap(Path.unapply(_))
   implicit private val kindKey: TExtractor[Kind]    = _.headOption.flatMap(Kind.unapply(_))
   implicit private val version: TExtractor[RefSpec] = _.headOption.map(RefSpec(_))
@@ -59,14 +60,14 @@ object Args {
     CliParam[String]('D', 'description, "specify a brief description of the project")
   val ForceArg  = CliParam[Unit]('F', 'force, "force this operation")
   val FileArg   = CliParam[Path]('f', 'file, "destination file")
-  val ImportArg = CliParam[SchemaRef]('i', Symbol("import"), "specify an external schema to import")
+  val ImportArg = CliParam[SchemaId]('i', Symbol("import"), "specify the schema to import")
 
   val IntransitiveArg = CliParam[Unit](
       'I',
       Symbol("intransitive"),
       "specify if this dependency should not be included transitively")
   val KeyArg         = CliParam[String]('k', 'key, "GPG key")
-  val LayerRefArg    = CliParam[IpfsRef]('l', 'layer, "layer reference")
+  val LayerRefArg    = CliParam[Import]('l', 'layer, "layer reference")
   val LicenseArg     = CliParam[LicenseId]('L', 'license, "license for code in this project")
   val ModuleArg      = CliParam[ModuleId]('m', 'module, "specify a module")
   val MainArg        = CliParam[String]('M', 'main, "specify a main class")

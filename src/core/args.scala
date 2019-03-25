@@ -33,6 +33,8 @@ object Args {
     _.headOption.flatMap(ModuleId.parse(_).toOption)
   implicit private val projectId: TExtractor[ProjectId] =
     _.headOption.flatMap(ProjectId.parse(_).toOption)
+  implicit private val layerId: TExtractor[LayerId] =
+    _.headOption.flatMap(LayerId.parse(_).toOption)
   implicit private val path: TExtractor[Path]       = _.headOption.flatMap(Path.unapply(_))
   implicit private val kindKey: TExtractor[Kind]    = _.headOption.flatMap(Kind.unapply(_))
   implicit private val version: TExtractor[RefSpec] = _.headOption.map(RefSpec(_))
@@ -70,6 +72,7 @@ object Args {
   val MainArg        = CliParam[String]('M', 'main, "specify a main class")
   val PluginArg      = CliParam[String]('P', 'plugin, "specify the name of the plugin")
   val ProjectNameArg = CliParam[ProjectId]('n', 'name, "specify a name for the project")
+  val LayerNameArg   = CliParam[LayerId]('n', 'name, "specify a name for the layer")
   val RepoNameArg    = CliParam[RepoId]('n', 'name, "specify a name for the repository")
   val SchemaNameArg  = CliParam[SchemaId]('n', 'name, "specify a name for the schema")
   val RawArg         = CliParam[Unit]('R', 'raw, "display raw output")

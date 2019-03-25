@@ -1053,8 +1053,8 @@ case class Checkout(
           path(layout).delete()
         }
 
-        io.println(msg"Checking out ${if (sources.isEmpty) "all sources from repository ${repoId}"
-        else sources.map(_.value).mkString("[", ", ", "]")}.")
+        io.println(msg"Checking out ${if (sources.isEmpty) "all sources"
+        else sources.map(_.value).mkString("[", ", ", "]")} from repository $repoId")
         path(layout).mkdir()
         layout.shell.git
           .sparseCheckout(
@@ -1153,7 +1153,7 @@ case class Repo(url: String) {
         path(layout).delete()
       }
 
-      io.println(s"Cloning Git repository $url.")
+      io.println(s"Cloning Git repository $this.")
       path(layout).mkdir()
       layout.shell.git.cloneBare(url, path(layout)).map { _ =>
         path(layout)
@@ -1192,7 +1192,20 @@ object SchemaRef {
   }
 }
 
-case class Import(ipfsRef: IpfsRef, schema: SchemaId) {
+object LayerId {
+  implicit val msgShow: MsgShow[LayerId]       = p => UserMsg(_.layer(p.key))
+  implicit val stringShow: StringShow[LayerId] = _.key
+  implicit def diff: Diff[LayerId]             = (l, r) => Diff.stringDiff.diff(l.key, r.key)
+
+  def parse(name: String): Try[LayerId] = name match {
+    case r"[a-z](-?[a-z0-9]+)*" => Success(LayerId(name))
+    case _                      => Failure(InvalidValue(name))
+  }
+}
+
+case class LayerId(key: String) extends Key(msg"project")
+
+case class Import(id: LayerId, ipfsRef: IpfsRef, schema: SchemaId) {
   def url: String = s"${ipfsRef.url}@${schema.key}"
 }
 

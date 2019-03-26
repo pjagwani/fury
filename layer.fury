@@ -118,24 +118,6 @@ schemas	default	id	default
 						binaries	
 						resources	
 						bloopSpec	None
-					imports	id	imports
-						kind	Library
-						main	None
-						plugin	None
-						manifest	
-						compiler	projectId	scala
-							moduleId	compiler
-							intransitive	true
-							hidden	false
-						after	fury/core	projectId	fury
-								moduleId	core
-								intransitive	false
-								hidden	false
-						params	
-						sources	src/imports	src/imports
-						binaries	
-						resources	
-						bloopSpec	None
 					io	id	io
 						kind	Library
 						main	None
@@ -191,10 +173,6 @@ schemas	default	id	default
 								hidden	false
 							fury/dependency	projectId	fury
 								moduleId	dependency
-								intransitive	false
-								hidden	false
-							fury/imports	projectId	fury
-								moduleId	imports
 								intransitive	false
 								hidden	false
 							fury/module	projectId	fury

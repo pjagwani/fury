@@ -51,9 +51,7 @@ object RepoCli {
       table     <- ~Tables(config).show(Tables(config).repositories(layout), cli.cols, rows, raw)(_.id)
       _ <- ~(if (!raw)
                io.println(Tables(config).contextString(layout.base, layer.showSchema, schema)))
-      _ <- ~io.println(UserMsg { theme =>
-            table.mkString("\n")
-          })
+      _ <- ~io.println(table.mkString("\n"))
     } yield io.await()
   }
 

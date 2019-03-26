@@ -62,9 +62,7 @@ object SchemaCli {
                   _.id)
       _ <- ~(if (!raw)
                io.println(Tables(config).contextString(layout.base, layer.showSchema, schema)))
-      _ <- ~io.println(UserMsg { theme =>
-            table.mkString("\n")
-          })
+      _ <- ~io.println(table.mkString("\n"))
     } yield io.await()
   }
 
@@ -96,9 +94,7 @@ object SchemaCli {
       table     <- ~diffTable(config, schema, other, rows, cli.cols, raw)
       _ <- ~(if (!raw)
                io.println(Tables(config).contextString(layout.base, layer.showSchema, schema)))
-      _ <- ~io.println(UserMsg { theme =>
-            table.mkString("\n")
-          })
+      _ <- ~io.println(table.mkString("\n"))
     } yield io.await()
   }
 

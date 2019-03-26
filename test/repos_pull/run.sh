@@ -17,13 +17,14 @@ mkdir -p fury_project
 (
     cd fury_project
     fury layer init
+    fury project add -n scala
+    fury module add -n compiler
+    fury module update -t compiler -C org.scala-lang:scala-compiler:2.12.8
     git init
     git add layer.fury
     git commit -m "Initial commit"
     fury project add -n webpage
     fury module add -n hello-world
-    fury repo add -u https://github.com/propensive/base.git -n base
-    fury import add -i base:2.12.6
     fury module update -c scala/compiler
     fury repo add -u $(realpath ../repo1) -n repo1 --version master
     fury source add -d repo1:src

@@ -5,12 +5,13 @@ set -x
 source $TESTROOTDIR/tests_lib
 
 fury layer init
+fury project add -n scala
+fury module add -n compiler
+fury module update -t compiler -C org.scala-lang:scala-compiler:2.12.8
 fury project add -n webpage
 fury module add -n hello-world
 fury source add -d src
 fury source list
-fury repo add -u https://github.com/propensive/base.git -n base
-fury import add -i base:2.12.6
 fury module update --compiler scala/compiler
 fury module update --type application
 fury module update --main HelloWorld

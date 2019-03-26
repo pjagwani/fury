@@ -5,9 +5,10 @@ set -x
 source $TESTROOTDIR/tests_lib
 
 fury layer init
+fury project add -n scala
+fury module add -n compiler
+fury module update -t compiler -C org.scala-lang:scala-compiler:2.12.8
 fury project add -n policy-file-test
-fury repo add -u https://github.com/propensive/base.git -n base
-fury import add -i base:2.12.6
 
 # Try writing inside shared dir
 fury module add -n write-inside-shared

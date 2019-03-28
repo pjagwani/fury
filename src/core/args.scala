@@ -36,11 +36,11 @@ object Args {
     _.headOption.flatMap(LayerId.parse(_).toOption)
   implicit private val imported: TExtractor[Import] =
     _.headOption.flatMap(Import.unapply(_))
-  implicit private val path: TExtractor[Path]       = _.headOption.flatMap(Path.unapply(_))
-  implicit private val kindKey: TExtractor[Kind]    = _.headOption.flatMap(Kind.unapply(_))
-  implicit private val version: TExtractor[RefSpec] = _.headOption.map(RefSpec(_))
-  implicit private val theme: TExtractor[Theme]     = _.headOption.flatMap(Theme.unapply(_))
-  implicit private val ipfsRef: TExtractor[IpfsRef] = _.headOption.flatMap(IpfsRef.parse(_))
+  implicit private val path: TExtractor[Path]           = _.headOption.flatMap(Path.unapply(_))
+  implicit private val kindKey: TExtractor[Kind]        = _.headOption.flatMap(Kind.unapply(_))
+  implicit private val version: TExtractor[RefSpec]     = _.headOption.map(RefSpec(_))
+  implicit private val theme: TExtractor[Theme]         = _.headOption.flatMap(Theme.unapply(_))
+  implicit private val ipfsRef: TExtractor[IpfsRef]     = _.headOption.flatMap(IpfsRef.parse(_))
   implicit private val layerPath: TExtractor[LayerPath] = _.headOption.flatMap(LayerPath.parse(_))
 
   val AllArg = CliParam[Unit]('a', 'all, "update all repositories")

@@ -64,6 +64,10 @@ schemas	default	id	default
 								moduleId	core
 								intransitive	false
 								hidden	false
+							shuttlecraft/core	projectId	shuttlecraft
+								moduleId	core
+								intransitive	true
+								hidden	false
 						params	
 						sources	src/core	src/core
 						binaries	ch.epfl.scala:bsp4j:2.0.0-M4	binRepo	central
@@ -356,7 +360,7 @@ schemas	default	id	default
 						binaries	
 						resources	
 						bloopSpec	None
-				main	Some	menu
+				main	Some	core
 				license	apache-2.0
 				description	
 				compiler	Some	projectId	scala
@@ -438,6 +442,11 @@ schemas	default	id	default
 				track	master
 				commit	94e03663a05fa2568b31e4315dea1e0d94513cc0
 				local	None
+			shuttlecraft	id	shuttlecraft
+				repo	git@github.com:VirtusLab/shuttlecraft.git
+				track	master
+				commit	740460740df006514e09d4c0ff2d346525b4938b
+				local	None
 			totalitarian	id	totalitarian
 				repo	git@github.com:propensive/totalitarian.git
 				track	fury
@@ -447,6 +456,8 @@ schemas	default	id	default
 				schema	default
 			scala:scala-2.12.8	repo	scala
 				schema	scala-2.12.8
+			shuttlecraft:default	repo	shuttlecraft
+				schema	default
 		main	Some	fury
 main	default
 aliases	

@@ -2,7 +2,7 @@ VERSION=${shell sh -c 'cat .version 2> /dev/null || git --git-dir git/fury/.git 
 MKFILE := $(abspath $(lastword $(MAKEFILE_LIST)))
 ROOTDIR := $(dir $(MKFILE))
 BLOOPVERSION=1.2.5
-DEPS=kaleidoscope totalitarian mitigation optometry eucalyptus exoskeleton escritoire mercator magnolia gastronomy contextual guillotine
+DEPS=kaleidoscope totalitarian mitigation optometry eucalyptus exoskeleton escritoire mercator magnolia gastronomy contextual guillotine shuttlecraft scalaj-http scalaj-http.fury
 REPOS:=$(foreach dep, $(DEPS), bootstrap/git/$(dep))
 BINDEPS=launcher ng.py ng
 NAILGUNJAR=nailgun-server-1.0.0.jar
@@ -57,6 +57,18 @@ bootstrap/scala:
 	mkdir -p $@
 	curl https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz | tar xvz -C $@ --strip 1
 
+bootstrap/git/shuttlecraft: bootstrap/git/.dir
+	mkdir -p $@
+	git clone https://github.com/VirtusLab/shuttlecraft.git $@ --branch=master
+
+bootstrap/git/scalaj-http: bootstrap/git/.dir
+	mkdir -p $@
+	git clone https://github.com/scalaj/scalaj-http.git $@ --branch=master
+
+bootstrap/git/scalaj-http.fury: bootstrap/git/.dir
+	mkdir -p $@
+	git clone https://github.com/odisseus/scalaj-http.fury.git $@ --branch=master
+
 bootstrap/git/%:
 	mkdir -p $@
 	git clone https://github.com/propensive/$*.git $@ --branch=fury
@@ -91,6 +103,12 @@ dist/bundle/lib/fury.jar: bootstrap/bin compile bootstrap/bin/fury/.version
 	jar -cf $@ -C $< fury
 	jar -uf $@ -C bootstrap/bin/fury .version
 
+dist/bundle/lib/scalaj-http.jar: bootstrap/bin bootstrap/bin/fury/.version dist/bundle/lib bootstrap/git/scalaj-http bootstrap/git/scalaj-http.fury compile
+	jar -cf $@ -C bootstrap/bin/scalaj http
+
+dist/bundle/lib/scalaj-http.fury.jar: dist/bundle/lib/scalaj-http.jar
+	echo "Nope!"
+
 dist/bundle/lib/%.jar: bootstrap/bin bootstrap/bin/fury/.version dist/bundle/lib bootstrap/git/% compile
 	jar -cf $@ -C $< $*
 
@@ -110,7 +128,7 @@ dist/bundle/bin/coursier: dist/bundle/bin/.dir
 jmh_jars=org.openjdk.jmh:jmh-core:1.21 org.openjdk.jmh:jmh-generator-bytecode:1.21 org.openjdk.jmh:jmh-generator-reflection:1.21 org.openjdk.jmh:jmh-generator-asm:1.21
 bsp_jars=org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:0.6.0 ch.epfl.scala:bsp4j:2.0.0-M4
 coursier_jars=io.get-coursier:coursier_2.12:1.1.0-M12
-external_jars=$(jmh_jars) $(bsp_jars) $(coursier_jars)
+external_jars=$(jmh_jars) $(bsp_jars) $(coursier_jars) com.lihaoyi:ujson_2.12:0.7.1 com.lihaoyi:upickle-core_2.12:0.7.1
 
 dependency-jars: dist/bundle/bin/coursier
 	for JAR in $(shell dist/bundle/bin/coursier fetch $(external_jars)); do \

@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "scalaj-http.fury/core",
+    "directory": "$ROOT/bootstrap/git/scalaj-http.fury/src",
+    "sources": [
+      "$ROOT/bootstrap/git/scalaj-http.fury/src"
+    ],
+    "dependencies": [
+
+    ],
+    "classpath": [
+      "$ROOT/bootstrap/scala/lib/scala-library.jar",
+      "$ROOT/bootstrap/scala/lib/scala-compiler.jar",
+      "$ROOT/bootstrap/scala/lib/scala-reflect.jar"
+    ],
+    "out": "$ROOT/bootstrap/bloop/out",
+    "classesDir": "$ROOT/bootstrap/bin",
+    "scala": {
+      "organization": "scala-lang.org",
+      "name": "scala-compiler",
+      "jars": [
+        "$ROOT/bootstrap/scala/lib/scala-library.jar",
+        "$ROOT/bootstrap/scala/lib/scala-compiler.jar",
+        "$ROOT/bootstrap/scala/lib/scala-reflect.jar"
+      ],
+      "options": [],
+      "version": "2.12.8"
+    }
+  }
+}

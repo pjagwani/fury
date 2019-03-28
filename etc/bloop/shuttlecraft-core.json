@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "shuttlecraft/core",
+    "directory": "$ROOT/bootstrap/git/shuttlecraft/src",
+    "sources": [
+      "$ROOT/bootstrap/git/shuttlecraft/src"
+    ],
+    "dependencies": [
+      "guillotine/core",
+      "scalaj-http/core"
+    ],
+    "classpath": [
+      "$ROOT/bootstrap/scala/lib/scala-library.jar",
+      "$ROOT/bootstrap/scala/lib/scala-compiler.jar",
+      "$ROOT/bootstrap/scala/lib/scala-reflect.jar",
+      "$ROOT/dist/bundle/lib/ujson_2.12-0.7.1.jar",
+      "$ROOT/dist/bundle/lib/upickle-core_2.12-0.7.1.jar"
+    ],
+    "out": "$ROOT/bootstrap/bloop/out",
+    "classesDir": "$ROOT/bootstrap/bin",
+    "scala": {
+      "organization": "scala-lang.org",
+      "name": "scala-compiler",
+      "jars": [
+        "$ROOT/bootstrap/scala/lib/scala-library.jar",
+        "$ROOT/bootstrap/scala/lib/scala-compiler.jar",
+        "$ROOT/bootstrap/scala/lib/scala-reflect.jar"
+      ],
+      "options": [],
+      "version": "2.12.8"
+    }
+  }
+}

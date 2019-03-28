@@ -38,7 +38,7 @@ case class UserMsg(string: Theme => String) {
 
   def *(n: Int): UserMsg = UserMsg(string(_) * n)
 
-  def +(that: UserMsg): UserMsg = msg"$this$that"
+  def +(that: UserMsg): UserMsg = UserMsg(theme => string(theme)+that.string(theme))
 
   def length: Int = string(Theme.NoColor).length
 }
@@ -46,9 +46,7 @@ case class UserMsg(string: Theme => String) {
 case class StringContexts(context: StringContext) extends AnyVal {
 
   def msg(parts: UserMsg*): UserMsg = {
-    val msgParts: Seq[UserMsg] = context.parts.map { p =>
-      msg"$p"
-    }
+    val msgParts: Seq[UserMsg] = context.parts.map { p => UserMsg(_ => p) }
     (msgParts.head +: parts.zip(msgParts.tail).map { case (l, r) => l + r }).reduce(_ + _)
   }
 

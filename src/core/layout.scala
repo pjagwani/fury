@@ -94,6 +94,9 @@ case class Layout(home: Path, pwd: Path, env: Environment, base: Path) {
   def manifestFile(digest: Digest): Path =
     resourcesDir(digest) / "manifest.mf"
 
+  def pomFile(digest: Digest): Path =
+    resourcesDir(digest) / "pom.xml"
+
   val shell = Shell(env)
 
 }

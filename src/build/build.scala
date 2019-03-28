@@ -272,6 +272,7 @@ object BuildCli {
       universe     <- hierarchy.universe
       compilation  <- universe.compilation(io, module.ref(project), layout)
       _            <- compilation.saveJars(io, module.ref(project), dir in layout.pwd, layout)
+      _            <- compilation.savePom(io, module.ref(project), module.allBinaries, dir in layout.pwd, layout)
     } yield io.await()
   }
 

@@ -443,13 +443,42 @@ case class Compilation(
       bins         <- ~allDependencies.flatMap(_.binaries)
       _            <- ~io.println(msg"Writing manifest file ${layout.manifestFile(hash(ref))}")
       manifestFile <- Manifest.file(layout.manifestFile(hash(ref)), bins.map(_.name), None)
-      path         <- ~(dest / str"${ref.projectId.key}-${ref.moduleId.key}.jar")
+      path         <- ~(dest / str"${basename(ref)}.jar")
       _            <- ~io.println(msg"Saving JAR file $path")
       _            <- layout.shell.aggregatedJar(path, files, manifestFile)
       _ <- ~bins.foreach { b =>
             b.copyTo(dest / b.name)
           }
     } yield ()
+
+  def savePom(io: Io, ref: ModuleRef, knownDependencies: Set[Binary], dest: Path, layout: Layout): Try[Unit] = {
+    // TODO Pass the version as a command line argument
+    // TODO What about group ID?
+    // TODO Allow the user to provide author and license information
+    val artifactName = str"${ref.projectId.key}-${ref.moduleId.key}"
+    val artifact = shuttlecraft.Artifact(
+      groupId = "com.example",
+      artifactId = artifactName,
+      version = "0.0.1-SNAPSHOT",
+      author = None,
+      license = None,
+      dependencies = knownDependencies.map{
+        case Binary(_, gr, ar, ve) => (gr, ar, ve)
+      },
+      jar = (dest / str"${basename(ref)}.jar").javaPath
+    )
+    for {
+      _ <- ~io.println(msg"Writing POM file ${layout.pomFile(hash(ref))}")
+      pomFile <- shuttlecraft.Pom.generatePom(artifact)(layout.sharedDir.javaPath)
+      path <- ~(dest / s"${ref.projectId.key}-${ref.moduleId.key}-0.0.1-SNAPSHOT.pom")
+      _ <- ~io.println(msg"Saving POM file to $path")
+      _ <- Path(pomFile).copyTo(path)
+    } yield ()
+  }
+
+  private def basename(ref: ModuleRef): String = {
+    s"${ref.projectId.key}-${ref.moduleId.key}"
+  }
 
   def allParams(io: Io, ref: ModuleRef, layout: Layout): List[String] =
     (artifacts(ref).params ++ allDependencies.filter(_.kind == Plugin).map { plugin =>

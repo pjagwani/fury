@@ -57,15 +57,15 @@ bootstrap/scala:
 	mkdir -p $@
 	curl https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz | tar xvz -C $@ --strip 1
 
-bootstrap/git/shuttlecraft: bootstrap/git/.dir
+bootstrap/git/shuttlecraft:
 	mkdir -p $@
 	git clone https://github.com/VirtusLab/shuttlecraft.git $@ --branch=master
 
-bootstrap/git/scalaj-http: bootstrap/git/.dir
+bootstrap/git/scalaj-http:
 	mkdir -p $@
 	git clone https://github.com/scalaj/scalaj-http.git $@ --branch=master
 
-bootstrap/git/scalaj-http.fury: bootstrap/git/.dir
+bootstrap/git/scalaj-http.fury:
 	mkdir -p $@
 	git clone https://github.com/odisseus/scalaj-http.fury.git $@ --branch=master
 
@@ -104,7 +104,7 @@ dist/bundle/lib/fury.jar: bootstrap/bin compile bootstrap/bin/fury/.version
 	jar -uf $@ -C bootstrap/bin/fury .version
 
 dist/bundle/lib/scalaj-http.jar: bootstrap/bin bootstrap/bin/fury/.version dist/bundle/lib bootstrap/git/scalaj-http bootstrap/git/scalaj-http.fury compile
-	jar -cf $@ -C bootstrap/bin/scalaj http
+	jar -cf $@ -C bootstrap/bin scalaj/http
 
 dist/bundle/lib/scalaj-http.fury.jar: dist/bundle/lib/scalaj-http.jar
 	echo "Nope!"
@@ -128,7 +128,8 @@ dist/bundle/bin/coursier: dist/bundle/bin/.dir
 jmh_jars=org.openjdk.jmh:jmh-core:1.21 org.openjdk.jmh:jmh-generator-bytecode:1.21 org.openjdk.jmh:jmh-generator-reflection:1.21 org.openjdk.jmh:jmh-generator-asm:1.21
 bsp_jars=org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:0.6.0 ch.epfl.scala:bsp4j:2.0.0-M4
 coursier_jars=io.get-coursier:coursier_2.12:1.1.0-M12
-external_jars=$(jmh_jars) $(bsp_jars) $(coursier_jars) com.lihaoyi:ujson_2.12:0.7.1 com.lihaoyi:upickle-core_2.12:0.7.1
+shuttlecraft_jars=com.lihaoyi:ujson_2.12:0.7.1 com.lihaoyi:upickle-core_2.12:0.7.1 com.typesafe.scala-logging:scala-logging_2.12:3.9.0 org.slf4j:slf4j-api:1.7.25
+external_jars=$(jmh_jars) $(bsp_jars) $(coursier_jars) $(shuttlecraft_jars)
 
 dependency-jars: dist/bundle/bin/coursier
 	for JAR in $(shell dist/bundle/bin/coursier fetch $(external_jars)); do \

@@ -4,7 +4,8 @@
     "name": "scalaj-http/core",
     "directory": "$ROOT/bootstrap/git/scalaj-http/src/main",
     "sources": [
-      "$ROOT/bootstrap/git/scalaj-http/src/main"
+      "$ROOT/bootstrap/git/scalaj-http/src/main/java",
+      "$ROOT/bootstrap/git/scalaj-http/src/main/scala"
     ],
     "dependencies": [
       "scalaj-http.fury/core"

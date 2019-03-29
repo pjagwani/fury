@@ -445,7 +445,7 @@ schemas	default	id	default
 			shuttlecraft	id	shuttlecraft
 				repo	git@github.com:VirtusLab/shuttlecraft.git
 				track	master
-				commit	740460740df006514e09d4c0ff2d346525b4938b
+				commit	64f311c66f3cc4f15d91cebef3949283d9f65bb9
 				local	None
 			totalitarian	id	totalitarian
 				repo	git@github.com:propensive/totalitarian.git

@@ -15,7 +15,9 @@
       "$ROOT/bootstrap/scala/lib/scala-compiler.jar",
       "$ROOT/bootstrap/scala/lib/scala-reflect.jar",
       "$ROOT/dist/bundle/lib/ujson_2.12-0.7.1.jar",
-      "$ROOT/dist/bundle/lib/upickle-core_2.12-0.7.1.jar"
+      "$ROOT/dist/bundle/lib/upickle-core_2.12-0.7.1.jar",
+      "$ROOT/dist/bundle/lib/scala-logging_2.12-3.9.0.jar",
+      "$ROOT/dist/bundle/lib/slf4j-api-1.7.25.jar"
     ],
     "out": "$ROOT/bootstrap/bloop/out",
     "classesDir": "$ROOT/bootstrap/bin",

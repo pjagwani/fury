@@ -40,6 +40,7 @@ import scala.concurrent._
 import scala.util._
 import scala.concurrent.duration._
 import scala.reflect.{ClassTag, classTag}
+import shuttlecraft.repository.maven2._
 
 object ManifestEntry {
   implicit val stringShow: StringShow[ManifestEntry] = _.key
@@ -451,12 +452,42 @@ case class Compilation(
           }
     } yield ()
 
-  def savePom(io: Io, ref: ModuleRef, knownDependencies: Set[Binary], dest: Path, layout: Layout): Try[Unit] = {
+  def savePom(io: Io, ref: ModuleRef, knownDependencies: Set[Binary], dest: Path, layout: Layout): Try[(shuttlecraft.Artifact, Path)] = {
+    //TODO we assume that the JAR has already been generated and has the correct name
+    val jar = (dest / str"${basename(ref)}.jar")
+    val artifact = createArtifact(ref, knownDependencies, jar)
+    val pom = dest / s"${ref.projectId.key}-${ref.moduleId.key}-0.0.1-SNAPSHOT.pom"
+    val resourceGen = new Maven2ResourceFactory(gpgPassphrase = None, signed = false)
+    for {
+      _ <- ~io.println(msg"Writing POM file ${layout.pomFile(hash(ref))}")
+      //FIXME we assume that POM is first, but this might change
+      Seq(tempPom, _) <- resourceGen.prepareBasicResources(artifact)(layout.sharedDir.javaPath)
+      _ <- ~io.println(msg"Saving POM file to $pom")
+      _ <- tempPom.save(pom.javaPath)
+    } yield (artifact, pom)
+  }
+
+  def deploy(io: Io, artifact: shuttlecraft.Artifact, layout: Layout, remoteUrl: String,
+             user: String, password: String): Try[Unit] = {
+    //TODO we assume that we are deploying to a Maven2 repository
+    implicit val workingDir: java.nio.file.Path = layout.workDir.javaPath
+    val mvnApi = new Maven2HttpApi(remoteUrl, user, password)
+    val resourceGen = new Maven2ResourceFactory(gpgPassphrase = None, signed = false)
+    val publisher = new Maven2Publisher(mvnApi, resourceGen)
+    val res: Try[Unit] = for{
+      _ <- ~io.println(msg"Deploying ${artifact.artifactId} v${artifact.version} to $remoteUrl")
+      _ <- publisher.publish(artifact)
+      _ <- ~io.println(msg"Deployed ${artifact.artifactId}")
+    } yield ()
+    res
+  }
+
+  private def createArtifact(ref: ModuleRef, knownDependencies: Set[Binary], jar: Path): shuttlecraft.Artifact = {
     // TODO Pass the version as a command line argument
     // TODO What about group ID?
     // TODO Allow the user to provide author and license information
     val artifactName = str"${ref.projectId.key}-${ref.moduleId.key}"
-    val artifact = shuttlecraft.Artifact(
+    shuttlecraft.Artifact(
       groupId = "com.example",
       artifactId = artifactName,
       version = "0.0.1-SNAPSHOT",
@@ -465,15 +496,8 @@ case class Compilation(
       dependencies = knownDependencies.map{
         case Binary(_, gr, ar, ve) => (gr, ar, ve)
       },
-      jar = (dest / str"${basename(ref)}.jar").javaPath
+      jar = jar.javaPath
     )
-    for {
-      _ <- ~io.println(msg"Writing POM file ${layout.pomFile(hash(ref))}")
-      pomFile <- shuttlecraft.Pom.generatePom(artifact)(layout.sharedDir.javaPath)
-      path <- ~(dest / s"${ref.projectId.key}-${ref.moduleId.key}-0.0.1-SNAPSHOT.pom")
-      _ <- ~io.println(msg"Saving POM file to $path")
-      _ <- Path(pomFile).copyTo(path)
-    } yield ()
   }
 
   private def basename(ref: ModuleRef): String = {

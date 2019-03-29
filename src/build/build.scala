@@ -140,7 +140,7 @@ object BuildCli {
     for {
       invoc <- cli.read()
       io    <- invoc.io()
-      _     <- ~io.println(str"""|     _____ 
+      _     <- ~io.println(str"""|     _____
                              |    / ___/__ __ ____ __ __
                              |   / __/ / // // ._// // /
                              |  /_/    \_._//_/  _\_. /
@@ -273,6 +273,35 @@ object BuildCli {
       compilation  <- universe.compilation(io, module.ref(project), layout)
       _            <- compilation.saveJars(io, module.ref(project), dir in layout.pwd, layout)
       _            <- compilation.savePom(io, module.ref(project), module.allBinaries, dir in layout.pwd, layout)
+    } yield io.await()
+  }
+
+  def deploy(ctx: MenuContext): Try[ExitStatus] = {
+    import ctx._
+    for {
+      cli              <- cli.hint(SchemaArg, layer.schemas)
+      schemaArg        <- ~cli.peek(SchemaArg).getOrElse(layer.main)
+      schema           <- layer.schemas.findBy(schemaArg)
+      cli              <- cli.hint(ProjectArg, schema.projects)
+      optProjectId     <- ~cli.peek(ProjectArg).orElse(schema.main)
+      optProject       <- ~optProjectId.flatMap(schema.projects.findBy(_).toOption)
+      cli              <- cli.hint(ModuleArg, optProject.to[List].flatMap(_.modules))
+      cli              <- cli.hint(UrlArg)
+      invoc            <- cli.read()
+      io               <- invoc.io()
+      url              <- invoc(UrlArg)
+      username         <- invoc(UserArg)
+      password         <- invoc(PasswordArg)
+      project          <- optProject.ascribe(UnspecifiedProject())
+      optModuleId      <- ~invoc(ModuleArg).toOption.orElse(project.main)
+      optModule        <- ~optModuleId.flatMap(project.modules.findBy(_).toOption)
+      module           <- optModule.ascribe(UnspecifiedModule())
+      hierarchy        <- schema.hierarchy(io, layout.base, layout)
+      universe         <- hierarchy.universe
+      compilation      <- universe.compilation(io, module.ref(project), layout)
+      _                <- compilation.saveJars(io, module.ref(project), layout.sharedDir, layout)
+      (artifact, pom)  <- compilation.savePom(io, module.ref(project), module.allBinaries, layout.sharedDir, layout)
+      _                <- compilation.deploy(io, artifact, layout, url, username, password)
     } yield io.await()
   }
 
